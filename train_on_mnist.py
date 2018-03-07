@@ -44,7 +44,7 @@ def main():
 
     net = Lenet(10)
     with tf.name_scope("loss"):
-        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=net.one_hot_y, logits=net.logits)
+        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=net.one_hot_y, logits=net.output)
         loss_operation = tf.reduce_mean(cross_entropy, name="loss")
 
     with tf.name_scope("train"):
@@ -52,7 +52,7 @@ def main():
         training_op = optimizer.minimize(loss_operation)
 
     with tf.name_scope("eval"):
-        correct = tf.equal(tf.argmax(net.logits, 1), tf.argmax(net.one_hot_y, 1))
+        correct = tf.equal(tf.argmax(net.output, 1), tf.argmax(net.one_hot_y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct,tf.float32))
 
     init = tf.global_variables_initializer()

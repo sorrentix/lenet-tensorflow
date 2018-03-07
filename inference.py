@@ -16,7 +16,7 @@ def main():
 
     answer = 'y'
 
-    net = Lenet(10)
+    net = Lenet(10, is_trainable=False)
 
     saver = tf.train.Saver()
 
@@ -25,7 +25,7 @@ def main():
         while answer != 'n':
             index = np.random.randint(0, len(X_test))
 
-            Z = net.logits.eval(feed_dict={net.X: X_test[index].reshape(1,32,32,1)})
+            Z = net.output.eval(feed_dict={net.X: X_test[index].reshape(1,32,32,1)})
             y_pred = np.argmax(Z, axis=1)
 
             print("Predicted class:", y_pred)
