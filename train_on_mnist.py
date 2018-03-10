@@ -41,10 +41,13 @@ def main():
     #Shuffle the training data
     X_train, y_train = shuffle(X_train, y_train)
 
+    X = tf.placeholder(tf.float32, shape=(None, 32, 32, 1), name="X")
+    y = tf.placeholder(tf.int32, shape=(None), name="y")
+    one_hot_y = tf.one_hot(y, 10)
 
-    net = Lenet(10)
+    net = Lenet(X, is_trainable=True)
     with tf.name_scope("loss"):
-        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=net.one_hot_y, logits=net.logits)
+        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=one_hot_y, logits=net.output)
         loss_operation = tf.reduce_mean(cross_entropy, name="loss")
 
     with tf.name_scope("train"):
@@ -52,7 +55,7 @@ def main():
         training_op = optimizer.minimize(loss_operation)
 
     with tf.name_scope("eval"):
-        correct = tf.equal(tf.argmax(net.logits, 1), tf.argmax(net.one_hot_y, 1))
+        correct = tf.equal(tf.argmax(net.output, 1), tf.argmax(one_hot_y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct,tf.float32))
 
     init = tf.global_variables_initializer()
@@ -81,15 +84,15 @@ def main():
                 X_batch, y_batch = X_train[offset:end], y_train[offset:end]
 
                 if batch_index % 10 == 0:
-                    cross_entropy_str = cross_entropy_summary.eval(feed_dict={net.X: X_batch, net.y: y_batch})
+                    cross_entropy_str = cross_entropy_summary.eval(feed_dict={X: X_batch, y: y_batch})
                     step = epoch * num_batches + batch_index
                     file_writer.add_summary(cross_entropy_str, step)
 
-                sess.run(training_op, feed_dict={net.X: X_batch, net.y: y_batch})
+                sess.run(training_op, feed_dict={X: X_batch, y: y_batch})
                 batch_index += 1
 
-            acc_train_str = acc_train_summary.eval(feed_dict={net.X: X_train, net.y: y_train})
-            acc_val_str = acc_val_summary.eval(feed_dict={net.X: X_validation, net.y: y_validation})
+            acc_train_str = acc_train_summary.eval(feed_dict={X: X_train, y: y_train})
+            acc_val_str = acc_val_summary.eval(feed_dict={X: X_validation, y: y_validation})
             file_writer.add_summary(acc_train_str,epoch)
             file_writer.add_summary(acc_val_str,epoch)
             print("Epoch:", epoch)
@@ -103,7 +106,7 @@ def main():
     with tf.Session() as sess:
         saver.restore(sess, save_path)
 
-        acc_test = accuracy.eval(feed_dict={net.X: X_test, net.y: y_test})
+        acc_test = accuracy.eval(feed_dict={X: X_test, y: y_test})
         print("Test Accuracy = {:.3f}".format(acc_test))
 
 

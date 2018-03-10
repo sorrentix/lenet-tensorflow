@@ -16,7 +16,10 @@ def main():
 
     answer = 'y'
 
-    net = Lenet(10)
+    # PLACEHOLDER FOR FEEDING INPUT DATA
+    X = tf.placeholder(tf.float32, shape=(None, 32, 32, 1), name="X")
+
+    net = Lenet(X)
 
     saver = tf.train.Saver()
 
@@ -25,16 +28,16 @@ def main():
         while answer != 'n':
             index = np.random.randint(0, len(X_test))
 
-            Z = net.logits.eval(feed_dict={net.X: X_test[index].reshape(1,32,32,1)})
+            Z = net.output.eval(feed_dict={X: X_test[index].reshape(1,32,32,1)})
             y_pred = np.argmax(Z, axis=1)
 
+            print("All of the classes :", Z)
             print("Predicted class:", y_pred)
             print("Actual class:   ", y_test[index])
             print()
             answer = input("Do you want to predict one more number?(y/n) ")
 
 
-
-#Standard way to define program starting point
+# Standard way to define program starting point
 if __name__ == '__main__':
     main()
